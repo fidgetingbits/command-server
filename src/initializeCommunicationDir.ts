@@ -10,6 +10,7 @@ export function initializeCommunicationDir() {
 
   console.debug(`Creating communication dir ${communicationDirPath}`);
   mkdirSync(communicationDirPath, { recursive: true, mode: 0o770 });
+  // FIXME: make this folder hidden on windows? ie: attrib +h communicationDirPath
 
   const stats = lstatSync(communicationDirPath);
 

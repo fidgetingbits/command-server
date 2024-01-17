@@ -23,7 +23,7 @@ export function getCommunicationDirPath() {
   // bother with a suffix
   const suffix = info.uid >= 0 ? `-${info.uid}` : "";
 
-  // See https://github.com/talonhub/community/issues/966 for why we do
+  // NB: See https://github.com/talonhub/community/issues/966 for why we do
   // per-os directories
   if (process.platform === "win32") {
     return join(`${homedir()}\\AppData\\Roaming\\talon\\`, `vscode-command-server${suffix}`);
