@@ -22,24 +22,6 @@
             default = pkgs.mkYarnPackage {
               pname = "${name}-${version}";
               src = ./.;
-              extraBuildInputs = [ pkgs.breakpointHook ];
-
-              # src = pkgs.fetchFromGitHub {
-              #   owner = "fidgetingbits";
-              #   repo = pname;
-              #   ref = "fix-tmpdir";
-              #   rev = "5fa7775e22abaaf2c332dcf94bdce88ebb40b71f";
-              #   sha256 = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
-              # };
-
-              # packageJson = ./package.json;
-
-              # offlineCache = pkgs.fetchYarnDeps {
-              #   yarnLock = "${src}/yarn.lock";
-              #   hash = "sha256-SsVvgqFMklQFDrNUBcrVAhe1eSDChUb5EtD773MGQno=";
-              # };
-
-              # yarnLock = ./yarn.lock;
 
               buildPhase = ''
                 # yarn tries to create a .yarn file in $HOME. There's probably a
@@ -57,7 +39,6 @@
               '';
 
               installPhase = ''
-                # false
                 mkdir $out
                 mv ./deps/command-server/$pname.vsix $out;
               '';
