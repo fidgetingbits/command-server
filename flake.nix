@@ -15,28 +15,51 @@
         ({ pkgs, ... }:
           let
             attrs = with builtins; fromJSON (readFile ./package.json);
-            # FIXME: Add the reference to name/version from package.json
-            # https://github.com/cab404/vscode-direnv/blob/fd242c19ef66db7f3e7ed2687a4a50d33af2957b/flake.nix#L26
-
+            name = attrs.name;
+            version = attrs.version;
           in
           {
             default = pkgs.mkYarnPackage {
-              pname = with attrs; name;
+              pname = "${name}-${version}";
               src = ./.;
-              packageJson = ./package.json;
-              yarnLock = ./yarn.lock;
+              extraBuildInputs = [ pkgs.breakpointHook ];
+
+              # src = pkgs.fetchFromGitHub {
+              #   owner = "fidgetingbits";
+              #   repo = pname;
+              #   ref = "fix-tmpdir";
+              #   rev = "5fa7775e22abaaf2c332dcf94bdce88ebb40b71f";
+              #   sha256 = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
+              # };
+
+              # packageJson = ./package.json;
+
+              # offlineCache = pkgs.fetchYarnDeps {
+              #   yarnLock = "${src}/yarn.lock";
+              #   hash = "sha256-SsVvgqFMklQFDrNUBcrVAhe1eSDChUb5EtD773MGQno=";
+              # };
+
+              # yarnLock = ./yarn.lock;
 
               buildPhase = ''
                 # yarn tries to create a .yarn file in $HOME. There's probably a
                 # better way to fix this but setting HOME to TMPDIR works for now.
-                export HOME="$TMPDIR"
-                yarn --offline compile
-                echo y | yarn --offline vsce package --yarn -o $pname.vsix
+                export HOME="."
+                yarn --offline run compile
+                # non-existent symlink errors during packaging
+                rm ./deps/command-server/command-server
+                # need node_modules for vsce, so don't use symlink
+                rm ./deps/command-server/node_modules
+                cp -R ./node_modules ./deps/command-server
+                pushd ./deps/command-server
+                echo y | yarn --offline vsce package --yarn -o ./$pname.vsix
+                popd
               '';
 
               installPhase = ''
+                # false
                 mkdir $out
-                mv $pname.vsix $out
+                mv ./deps/command-server/$pname.vsix $out;
               '';
 
               distPhase = "true";
@@ -49,7 +72,7 @@
           default = pkgs.mkShell
             {
               packages = with pkgs;
-                [ yarn ];
+                [ yarn typescript ];
             };
         });
     };
